@@ -2,7 +2,7 @@
 
 Last updated: 2026-01-11
 
-A modular, menu-driven toolbox for common Windows admin tasks: file management, networking, system/services, security, hypervisors (Proxmox/VMware), and Cloud Environments (Azure). Includes Pester tests and YAML-based defaults. Output and logging are configurable and enabled by default.
+A modular, menu-driven toolbox for common Windows admin tasks: file management, networking, system/services (including Active Directory), security, hypervisors (Proxmox/VMware), and Cloud Environments (Azure). Includes Pester tests and YAML-based defaults. Output and logging are configurable and enabled by default.
 
 ## Quick Start
 
@@ -75,173 +75,214 @@ See example values in [config.yaml](config.yaml).
 
 ## Menus & Features
 
-- File Management
-  - Compare folders (basic / hash)
-  - Find duplicate files
-  - Directory listing, Tree view
-  - Create file, Delete file
-  - Delete files older than X days
-  - Compress folder (ZIP/7Z/TAR)
-  - Copy file/folder, Move file/folder
-  - Compute hash (MD5/SHA1/SHA256/SHA384/SHA512)
-    - Writes per-file manifest when `OutputSettings.WriteHashManifest` is enabled
-- Network
-  - Ping host, Show IP config, Test TCP port
-  - Show adapter properties
-  - Set IPv4 static (with mask/prefix), Set DNS servers, Set DNS suffix
-  - DHCP show/enable/release/renew
-  - SMB share create/remove, Map network drive
-  - Routing: show/add/remove
-  - Remote sessions: SSH, Telnet, RDP launchers
-  - TCP listener: bind IP/port with optional auto-stop
-  - Transfers:
-    - SFTP: psftp session launcher; scripted upload/download using batch files
-    - FTP: ftp.exe session launcher; scripted upload/download using `-s:script`
-    - Verification: optional SHA256 comparison by re-downloading
-- System
-  - Disk usage, Top processes, System info summary
-  - Services: list, start, restart, disable/enable startup
-  - Processes: list (filter/sort), start, stop
-  - Registry: read/set value (HKLM/HKCU)
-- Security
-  - Local Administrators members
-  - Windows Defender status
-  - Windows Firewall profile status
-- Hypervisor Tools
-  - Proxmox:
-    - Connection & Basics: SSH connectivity test, `qm list`, storage usage (`pvesm status`, `df -h`)
-    - VM & Container Management:
-      - VM power: start/stop/restart/delete (`qm start/stop/reboot/destroy`)
-      - CT power: start/stop/shutdown/delete (`pct start/stop/shutdown/destroy`)
-      - Clone VM (full or linked): `qm clone`
-      - Modify VM hardware: `qm set` (cores/memory/NIC), `qm resize` (disk)
-      - Snapshots: create/restore (`qm snapshot` / `qm rollback`)
-      - Migrate VM between nodes: `qm migrate`
-      - Query VM status/config: `qm status` / `qm config`
-      - Create VM: `qm create` with optional `--ide2 iso,media=cdrom`, `--net0`
-      - Create CT (LXC): `pct create` with `-hostname`, `-cores`, `-memory`, `-rootfs`
-    - Storage & Backup Automation:
-      - Trigger backup: `vzdump` with mode, storage, vmid list
-      - Monitor backup jobs: `journalctl -u vzdump`
-      - Storage pools list: `pvesm status`
-      - Upload ISO via `scp` to `/var/lib/vz/template/iso`
-      - Resize VM disk: `qm resize`
-      - Backup jobs: list/create/delete via `pvesh` (`/cluster/backup`)
-      - Add/Remove storage: `pvesm add dir|nfs|cifs` / `pvesm remove`
-    - Cluster & Node Operations:
-      - Cluster health/quorum: `pvecm status`
-      - Manage nodes: add/remove (`pvecm add` / `pvecm delnode`)
-      - Ceph status: `ceph -s`
-      - Node monitor (CPU/mem/disk): shell commands
-      - Node power: reboot/shutdown
-      - HA status: `ha-manager status`
-    - User & Permission Management:
-      - Create/modify user: `pveum user add` (+ optional `pveum passwd`)
-      - Create role with privileges: `pveum role add -privs ...`
-      - Assign permissions (ACL): `pveum aclmod`
-      - Delete user: `pveum user delete`
-      - Create user API token: `pveum usertoken add`
-  - VMware:
-    - Connection & Basics: SSH connectivity test, `vim-cmd vmsvc/getallvms`, datastore usage (`esxcli storage filesystem list`, `df -h`)
-    - VM Lifecycle Management:
-      - Power: start/stop/reset/suspend (`vim-cmd vmsvc/power.*`)
-      - Delete VM: `vim-cmd vmsvc/destroy`
-      - Snapshots: create/revert/remove (`vim-cmd vmsvc/snapshot.*`)
-      - Migrate VM: vMotion/Storage vMotion via `govc vm.migrate` (requires vCenter/govc)
-      - Create dummy VM: `vim-cmd vmsvc/createdummyvm`
-      - Clone locally: copy VM folder + register (`cp -r`, `vim-cmd solo/registervm`)
-      - Deploy from template: `govc vm.clone` (requires vCenter/govc)
-      - Modify hardware: CPU/RAM via `govc vm.change`
-    - Storage & Datastore Operations:
-      - Datastore list: `esxcli storage filesystem list`
-      - Expand VM disk: `vmkfstools -X`
-      - Upload ISOs: `scp` to `/vmfs/volumes/<datastore>/<folder>`
-      - Create VMFS datastore: `esxcli storage vmfs create`
-      - Apply storage policy: `govc vm.storage.policy.apply` (requires vCenter/govc)
-    - Host & Cluster Management:
-      - Add/remove host: `govc host.add` / `govc host.remove`
-      - Configure networking: `esxcli network vswitch standard ...` (vSwitch, portgroup, VLAN)
-      - Rescan storage adapter: `esxcli storage core adapter rescan`
-      - Cluster settings (DRS/HA): `govc cluster.change` (requires vCenter/govc)
-      - Patch/update host: `esxcli software profile update`
-      - Maintenance mode: `vim-cmd hostsvc/maintenance_mode_enter|exit`
-    - User, Role & Permission Management:
-      - ESXi user: `esxcli system account add`
-      - vCenter role: `govc role.create`
-      - Assign permissions: `govc permissions.set`
-      - Create SSO user: `govc sso.user.create`
-    - Monitoring, Reporting & Compliance:
-      - Inventory report: `govc find` (fallback to `vim-cmd vmsvc/getallvms`)
-      - Performance metrics: `govc metric.sample`
-      - Host profile compliance: `govc host.profile.check`
-- Cloud Environments
-  - Azure:
-    - Auth & Identity:
-      - Login and set subscription context: `Connect-AzAccount`, `Set-AzContext`
-      - Create Service Principal and assign role: `New-AzADServicePrincipal`, `New-AzRoleAssignment`
-    - Resource Provisioning:
-      - Resource Group: `New-AzResourceGroup`
-      - Quick VM create (az CLI): `az vm create`
-      - Full VM create (Az cmdlets): `New-AzVM`
-    - Networking:
-      - Virtual Network: `New-AzVirtualNetwork`
-      - Network Security Group: `New-AzNetworkSecurityGroup`, rules via `New-AzNetworkSecurityRuleConfig` + `Set-AzNetworkSecurityGroup`
-      - Subnets: `Get-AzVirtualNetwork`, `Add-AzVirtualNetworkSubnetConfig`, `Set-AzVirtualNetwork`
-      - Associate NSG to Subnet: `Set-AzVirtualNetworkSubnetConfig` + `Set-AzVirtualNetwork`
-      - NSG preset rules (HTTP/SSH): `New-AzNetworkSecurityRuleConfig` + `Set-AzNetworkSecurityGroup`
-    - Storage:
-      - Storage Account: `New-AzStorageAccount`
-    - IaC:
-      - Export Resource Group template: `Export-AzResourceGroup`
-      - Export single resource (az CLI): `az resource export`
-      - Bicep helpers: `az bicep decompile` (ARM → Bicep), `az bicep build` (Bicep → ARM)
-    - Monitoring:
-      - Query metrics: `Get-AzMetric`
-
-- Active Directory
-  - Core User Management:
-    - Create user: `AD-User-Create`
-    - Disable/Enable: `AD-User-Disable`, `AD-User-Enable`
-    - Delete (confirmation-aware): `AD-User-Delete`
-    - Reset password + unlock: `AD-User-ResetPasswordUnlock`
-    - Move between OUs: `AD-User-MoveBetweenOU`
-    - Bulk create (CSV): `AD-User-BulkCreateFromCsv`
-    - Bulk update (CSV): `AD-User-BulkUpdateFromCsv`
-    - Set home folder: `AD-User-SetHomeFolder`
-    - Generate CSV templates: `AD-GenerateCsvTemplates`
-  - Group Management:
-    - Create/Delete (confirmation-aware): `AD-Group-Create`, `AD-Group-Delete`
-    - Add/Remove member: `AD-Group-AddMember`, `AD-Group-RemoveMember`
-    - Convert scope: `AD-Group-ConvertScope`
-    - Audit membership snapshot: `AD-Group-AuditMembership`
-    - Check user membership: `AD-User-CheckGroupMembership`
-  - Organizational Units:
-    - Create/Rename/Move/Delete (confirmation-aware): `AD-OU-Create`, `AD-OU-Rename`, `AD-OU-Move`, `AD-OU-Delete`
-    - Delegate permission (simplified): `AD-OU-DelegatePermission`
-    - Cleanup empty OUs (advisory): `AD-Cleanup-EmptyOUs`
-  - Computer Accounts:
-    - Create/Delete (confirmation-aware): `AD-Computer-Create`, `AD-Computer-Delete`
-    - Reset account: `AD-Computer-ResetAccount`
-    - Move between OUs: `AD-Computer-MoveBetweenOU`
-    - Report inactive computers: `AD-Report-InactiveComputers`
-  - Searching & Reporting:
-    - Locked-out users: `AD-Report-LockedOutUsers`
-    - Disabled accounts: `AD-Report-DisabledAccounts`
-    - Password expiration: `AD-Report-PasswordExpiration`
-    - Last logon times: `AD-Report-LastLogonTimes`
-    - Inactive users: `AD-Report-InactiveUsers`
-    - Group membership report: `AD-Report-GroupMembership`
-  - Security & Access Control:
-    - Read/Modify ACL (simplified): `AD-ACL-Read`, `AD-ACL-Modify`
-    - Permissions audit (CSV): `AD-Audit-Permissions`
-  - Domain & Infrastructure:
-    - FSMO roles view/transfer/seize: `AD-FSMO-View`, `AD-FSMO-Transfer`, `AD-FSMO-Seize`
-    - Trusts view/create/remove (guarded): `AD-Trusts-View`, `AD-Trusts-Create`, `AD-Trusts-Remove`
-    - Sites & Subnets: `AD-Sites-Create`
-    - Replication monitor: `AD-Replication-Monitor`
-    - DC health check: `AD-DC-HealthCheck`
-  - Service Accounts (gMSA):
-    - Create/Install/Get: `AD-gMSA-Create`, `AD-gMSA-Install`, `AD-gMSA-Get`
+Menu Overview
+- Main Menu
+  - File Management Tools
+    - Comparisons & Listings
+      - Compare folders (basic)
+      - Compare folders (hash)
+      - Find duplicate files
+      - Directory listing
+      - Tree view of folder
+    - Create & Delete
+      - Create new file
+      - Delete a file
+      - Delete files older than X days
+    - Copy, Move & Compress
+      - Copy item (file/folder)
+      - Move item (file/folder)
+      - Compress folder (ZIP/7Z/TAR)
+    - Hashing
+      - Compute hash (MD5/SHA1/SHA256/SHA384/SHA512)
+  - Network Tools
+    - Diagnostics (Ping, IP, Port)
+      - Ping host
+      - Show IP configuration
+      - Test TCP port
+    - Adapter & IP
+      - Show adapter properties
+      - Set IPv4 static address
+    - DNS & DHCP
+      - Set DNS servers
+      - Set DNS connection suffix
+      - DHCP: show/enable/release/renew
+    - Shares & Drives
+      - Create SMB share
+      - Remove SMB share
+      - Map network drive
+    - Routing
+      - Show table
+      - Add route
+      - Remove route
+    - Remote Connections
+      - SSH 
+      - Telnet 
+      - RDP
+    - Listeners
+      - Start TCP listener
+    - Transfers (SFTP/FTP)
+      - SFTP: session/upload/download (with hash verification)
+      - FTP: session/upload/download (with hash verification)
+  - System Tools
+    - Diagnostics
+      - Disk usage
+      - System info summary
+      - Top processes by memory
+    - Services
+      - List all
+      - Start / Restart
+      - Disable / Enable startup
+    - Processes
+      - List (filter/sort)
+      - Start process
+      - Stop process
+    - Registry
+      - Read value (HKLM/HKCU)
+      - Set value (HKLM/HKCU)
+    - Active Directory
+      - Core User Management:
+        - Create user: `AD-User-Create`
+        - Disable/Enable: `AD-User-Disable`, `AD-User-Enable`
+        - Delete (confirmation-aware): `AD-User-Delete`
+        - Reset password + unlock: `AD-User-ResetPasswordUnlock`
+        - Move between OUs: `AD-User-MoveBetweenOU`
+        - Bulk create (CSV): `AD-User-BulkCreateFromCsv`
+        - Bulk update (CSV): `AD-User-BulkUpdateFromCsv`
+        - Set home folder: `AD-User-SetHomeFolder`
+        - Generate CSV templates: `AD-GenerateCsvTemplates`
+      - Group Management:
+        - Create/Delete (confirmation-aware): `AD-Group-Create`, `AD-Group-Delete`
+        - Add/Remove member: `AD-Group-AddMember`, `AD-Group-RemoveMember`
+        - Convert scope: `AD-Group-ConvertScope`
+        - Audit membership snapshot: `AD-Group-AuditMembership`
+        - Check user membership: `AD-User-CheckGroupMembership`
+      - Organizational Units:
+        - Create/Rename/Move/Delete (confirmation-aware): `AD-OU-Create`, `AD-OU-Rename`, `AD-OU-Move`, `AD-OU-Delete`
+        - Delegate permission (simplified): `AD-OU-DelegatePermission`
+        - Cleanup empty OUs (advisory): `AD-Cleanup-EmptyOUs`
+      - Computer Accounts:
+        - Create/Delete (confirmation-aware): `AD-Computer-Create`, `AD-Computer-Delete`
+        - Reset account: `AD-Computer-ResetAccount`
+        - Move between OUs: `AD-Computer-MoveBetweenOU`
+        - Report inactive computers: `AD-Report-InactiveComputers`
+      - Searching & Reporting:
+        - Locked-out users: `AD-Report-LockedOutUsers`
+        - Disabled accounts: `AD-Report-DisabledAccounts`
+        - Password expiration: `AD-Report-PasswordExpiration`
+        - Last logon times: `AD-Report-LastLogonTimes`
+        - Inactive users: `AD-Report-InactiveUsers`
+        - Group membership report: `AD-Report-GroupMembership`
+      - Security & Access Control:
+        - Read/Modify ACL (simplified): `AD-ACL-Read`, `AD-ACL-Modify`
+        - Permissions audit (CSV): `AD-Audit-Permissions`
+      - Domain & Infrastructure:
+        - FSMO roles view/transfer/seize: `AD-FSMO-View`, `AD-FSMO-Transfer`, `AD-FSMO-Seize`
+        - Trusts view/create/remove (guarded): `AD-Trusts-View`, `AD-Trusts-Create`, `AD-Trusts-Remove`
+        - Sites & Subnets: `AD-Sites-Create`
+        - Replication monitor: `AD-Replication-Monitor`
+        - DC health check: `AD-DC-HealthCheck`
+      - Service Accounts (gMSA):
+        - Create/Install/Get: `AD-gMSA-Create`, `AD-gMSA-Install`, `AD-gMSA-Get`
+  - Security Tools
+    - Local Administrators members
+    - Windows Defender status
+    - Windows Firewall profile status
+  - Hypervisor Tools
+    - Proxmox Tools
+      - Connection & Basics:
+        - SSH connectivity test 
+        - qm list 
+        - storage usage (pvesm status, df -h)
+      - VM & Container Management
+        - VM power: start/stop/restart/delete (qm start/stop/reboot/destroy)
+        - CT power: start/stop/shutdown/delete (pct start/stop/shutdown/destroy)
+        - Clone VM (full or linked): qm clone
+        - Modify VM hardware: qm set (cores/memory/NIC), qm resize (disk)
+        - Snapshots: create/restore (qm snapshot / qm rollback)
+        - Migrate VM between nodes: qm migrate
+        - Query VM status/config: qm status / qm config
+        - Create VM: qm create with optional --ide2 iso,media=cdrom, --net0
+        - Create CT (LXC): pct create with -hostname, -cores, -memory, -rootfs
+      - Storage & Backup Automation
+        - Trigger backup: vzdump with mode, storage, vmid list
+        - Monitor backup jobs: journalctl -u vzdump
+        - Storage pools list: pvesm status
+        - Upload ISO via scp to /var/lib/vz/template/iso
+        - Resize VM disk: qm resize
+        - Backup jobs: list/create/delete via pvesh (/cluster/backup)
+        - Add/Remove storage: pvesm add dir|nfs|cifs / pvesm remove
+      - Cluster & Node Operations
+        - Cluster health/quorum: pvecm status
+        - Manage nodes: add/remove (pvecm add / pvecm delnode)
+        - Ceph status: ceph -s
+        - Node monitor (CPU/mem/disk): shell commands
+        - Node power: reboot/shutdown
+        - HA status: ha-manager status
+      - User & Permission Management
+        - Create/modify user: pveum user add (+ optional pveum passwd)
+        - Create role with privileges: pveum role add -privs ...
+        - Assign permissions (ACL): pveum aclmod
+        - Delete user: pveum user delete
+        - Create user API token: pveum usertoken add
+    - VMware Tools
+      - Connection & Basics: 
+        - SSH connectivity test 
+        - vim-cmd vmsvc/getallvms 
+        - datastore usage (esxcli storage filesystem list, df -h)
+      - VM Lifecycle Management:
+        - Power: start/stop/reset/suspend (vim-cmd vmsvc/power.*)
+        - Delete VM: vim-cmd vmsvc/destroy
+        - Snapshots: create/revert/remove (vim-cmd vmsvc/snapshot.*)
+        - Migrate VM: vMotion/Storage vMotion via govc vm.migrate (requires vCenter/govc)
+        - Create dummy VM: vim-cmd vmsvc/createdummyvm
+        - Clone locally: copy VM folder + register (cp -r, vim-cmd solo/registervm)
+        - Deploy from template: govc vm.clone (requires vCenter/govc)
+        - Modify hardware: CPU/RAM via govc vm.change
+      - Storage & Datastore Operations
+        - Datastore list: esxcli storage filesystem list
+        - Expand VM disk: vmkfstools -X
+        - Upload ISOs: scp to /vmfs/volumes/<datastore>/<folder>
+        - Create VMFS datastore: esxcli storage vmfs create
+        - Apply storage policy: govc vm.storage.policy.apply (requires vCenter/govc)
+      - Host & Cluster Management
+        - Add/remove host: govc host.add / govc host.remove
+        - Configure networking: esxcli network vswitch standard ... (vSwitch, portgroup, VLAN)
+        - Rescan storage adapter: esxcli storage core adapter rescan
+        - Cluster settings (DRS/HA): govc cluster.change (requires vCenter/govc)
+        - Patch/update host: esxcli software profile update
+        - Maintenance mode: vim-cmd hostsvc/maintenance_mode_enter|exit      
+      - User, Role & Permission Management
+        - ESXi user: esxcli system account add
+        - vCenter role: govc role.create
+        - Assign permissions: govc permissions.set
+        - Create SSO user: govc sso.user.create
+      - Monitoring, Reporting & Compliance
+        - Inventory report: govc find (fallback to vim-cmd vmsvc/getallvms)
+        - Performance metrics: govc metric.sample
+        - Host profile compliance: govc host.profile.check
+  - Cloud Environment Tools
+    - Azure Tools
+      - Auth & Identity:
+        - Login and set subscription context: Connect-AzAccount, Set-AzContext
+        - Create Service Principal and assign role: New-AzADServicePrincipal, New-AzRoleAssignment
+      - Resource Provisioning:
+        - Resource Group: New-AzResourceGroup
+        - Quick VM create (az CLI): az vm create
+        - Full VM create (Az cmdlets): New-AzVM
+      - Networking:
+        - Virtual Network: New-AzVirtualNetwork
+        - Network Security Group: New-AzNetworkSecurityGroup, rules via New-AzNetworkSecurityRuleConfig + Set-AzNetworkSecurityGroup
+        - Subnets: Get-AzVirtualNetwork, Add-AzVirtualNetworkSubnetConfig, Set-AzVirtualNetwork
+        - Associate NSG to Subnet: Set-AzVirtualNetworkSubnetConfig + Set-AzVirtualNetwork
+        - NSG preset rules (HTTP/SSH): New-AzNetworkSecurityRuleConfig + Set-AzNetworkSecurityGroup
+      - Storage:
+        - Storage Account: New-AzStorageAccount
+      - IaC:
+        - Export Resource Group template: Export-AzResourceGroup
+        - Export single resource (az CLI): az resource export
+        - Bicep helpers: az bicep decompile (ARM → Bicep), az bicep build (Bicep → ARM)
+      - Monitoring:
+        - Query metrics: Get-AzMetric
 
 ## Testing
 
