@@ -55,7 +55,8 @@ Describe 'SystemTools menu dispatch' {
         $root = Split-Path -Parent $PSScriptRoot
         $commonPath = Join-Path $root 'modules\Common.ps1'
         $systemPath = Join-Path $root 'modules\SystemTools.ps1'
-        . "$commonPath"; . "$systemPath"
+        $adPath = Join-Path $root 'modules\ActiveDirectoryTools.ps1'
+        . "$commonPath"; . "$systemPath"; . "$adPath"
         Mock -CommandName Show-Header -MockWith {}
         Mock -CommandName Pause-Return -MockWith {}
     }
@@ -67,6 +68,16 @@ Describe 'SystemTools menu dispatch' {
         Mock -CommandName Start-ServiceInteractive -MockWith {}
         Show-SystemToolsMenu
         Assert-MockCalled Start-ServiceInteractive -Times 1
+    }
+
+    It 'invokes AD-User-Create via Active Directory Users submenu (5->1->1)' {
+        # Navigate: System Tools [5] Active Directory -> [1] Users submenu -> [1] Create -> Back (users) -> Back (AD) -> Back (system)
+        $answers = @('5','1','1','0','0','0')
+        Mock -CommandName Read-Host -MockWith { $script:ansSTAD.Dequeue() } | Out-Null
+        $script:ansSTAD = [System.Collections.Queue]::new(); $answers | ForEach-Object { [void]$script:ansSTAD.Enqueue($_) }
+        Mock -CommandName AD-User-Create -MockWith {}
+        Show-SystemToolsMenu
+        Assert-MockCalled AD-User-Create -Times 1
     }
 }
 

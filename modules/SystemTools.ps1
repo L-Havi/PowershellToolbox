@@ -43,6 +43,7 @@ function Show-SystemToolsMenu {
         Write-Host " [2] Services" -ForegroundColor White
         Write-Host " [3] Processes" -ForegroundColor White
         Write-Host " [4] Registry" -ForegroundColor White
+        Write-Host " [5] Active Directory" -ForegroundColor White
         Write-Host ""; Write-Host " [0] Back to main menu" -ForegroundColor DarkGray; Write-Host ""
         $selection = Read-Host "Select an option"
         switch ($selection) {
@@ -50,6 +51,7 @@ function Show-SystemToolsMenu {
             '2' { Show-ServicesMenu }
             '3' { Show-ProcessesMenu }
             '4' { Show-RegistryMenu }
+            '5' { Invoke-Tool -Name 'System.ActiveDirectory' -Action { Show-ActiveDirectoryToolsMenu } }
             '0' { break }
             default { Write-Host "Invalid selection, try again." -ForegroundColor Red; Start-Sleep -Seconds 1 }
         }

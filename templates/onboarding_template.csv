@@ -1,0 +1,3 @@
+Name,SamAccountName,UPN,OU,Password,Groups
+Alice Smith,asmith,asmith@domain.local,OU=Users,DC=domain,DC=local,P@ssw0rd!,Domain Users;Marketing
+Bob Jones,bjones,bjones@domain.local,OU=Users,DC=domain,DC=local,P@ssw0rd!,Domain Users;Sales

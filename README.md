@@ -1,5 +1,7 @@
 # PowerShell Toolbox
 
+Last updated: 2026-01-11
+
 A modular, menu-driven toolbox for common Windows admin tasks: file management, networking, system/services, security, hypervisors (Proxmox/VMware), and Cloud Environments (Azure). Includes Pester tests and YAML-based defaults. Output and logging are configurable and enabled by default.
 
 ## Quick Start
@@ -59,6 +61,11 @@ Sections:
   - RoleDefinitionName (default RBAC role for SP creation)
   - DefaultVNetName, DefaultSubnetName, DefaultNSGName
   - DefaultImage, DefaultVMSize
+- ADDefaults
+  - DomainController (optional)
+  - DefaultUserOU, DefaultGroupOU, DefaultComputerOU
+  - DefaultPassword, DefaultGroupScope
+  - DefaultHomeFolderRoot, DefaultHomeDrive
 
 Output and logging:
 - OutputSettings: `Enabled`, `Folder` (default: `output`), `WriteHashManifest`
@@ -191,6 +198,51 @@ See example values in [config.yaml](config.yaml).
     - Monitoring:
       - Query metrics: `Get-AzMetric`
 
+- Active Directory
+  - Core User Management:
+    - Create user: `AD-User-Create`
+    - Disable/Enable: `AD-User-Disable`, `AD-User-Enable`
+    - Delete (confirmation-aware): `AD-User-Delete`
+    - Reset password + unlock: `AD-User-ResetPasswordUnlock`
+    - Move between OUs: `AD-User-MoveBetweenOU`
+    - Bulk create (CSV): `AD-User-BulkCreateFromCsv`
+    - Bulk update (CSV): `AD-User-BulkUpdateFromCsv`
+    - Set home folder: `AD-User-SetHomeFolder`
+    - Generate CSV templates: `AD-GenerateCsvTemplates`
+  - Group Management:
+    - Create/Delete (confirmation-aware): `AD-Group-Create`, `AD-Group-Delete`
+    - Add/Remove member: `AD-Group-AddMember`, `AD-Group-RemoveMember`
+    - Convert scope: `AD-Group-ConvertScope`
+    - Audit membership snapshot: `AD-Group-AuditMembership`
+    - Check user membership: `AD-User-CheckGroupMembership`
+  - Organizational Units:
+    - Create/Rename/Move/Delete (confirmation-aware): `AD-OU-Create`, `AD-OU-Rename`, `AD-OU-Move`, `AD-OU-Delete`
+    - Delegate permission (simplified): `AD-OU-DelegatePermission`
+    - Cleanup empty OUs (advisory): `AD-Cleanup-EmptyOUs`
+  - Computer Accounts:
+    - Create/Delete (confirmation-aware): `AD-Computer-Create`, `AD-Computer-Delete`
+    - Reset account: `AD-Computer-ResetAccount`
+    - Move between OUs: `AD-Computer-MoveBetweenOU`
+    - Report inactive computers: `AD-Report-InactiveComputers`
+  - Searching & Reporting:
+    - Locked-out users: `AD-Report-LockedOutUsers`
+    - Disabled accounts: `AD-Report-DisabledAccounts`
+    - Password expiration: `AD-Report-PasswordExpiration`
+    - Last logon times: `AD-Report-LastLogonTimes`
+    - Inactive users: `AD-Report-InactiveUsers`
+    - Group membership report: `AD-Report-GroupMembership`
+  - Security & Access Control:
+    - Read/Modify ACL (simplified): `AD-ACL-Read`, `AD-ACL-Modify`
+    - Permissions audit (CSV): `AD-Audit-Permissions`
+  - Domain & Infrastructure:
+    - FSMO roles view/transfer/seize: `AD-FSMO-View`, `AD-FSMO-Transfer`, `AD-FSMO-Seize`
+    - Trusts view/create/remove (guarded): `AD-Trusts-View`, `AD-Trusts-Create`, `AD-Trusts-Remove`
+    - Sites & Subnets: `AD-Sites-Create`
+    - Replication monitor: `AD-Replication-Monitor`
+    - DC health check: `AD-DC-HealthCheck`
+  - Service Accounts (gMSA):
+    - Create/Install/Get: `AD-gMSA-Create`, `AD-gMSA-Install`, `AD-gMSA-Get`
+
 ## Testing
 
 Requires Pester v5 (installed in CurrentUser scope). Run from repository root:
@@ -212,11 +264,76 @@ Invoke-Pester -Path .\tests -CI
 - Root script: [PowershellToolbox.ps1](PowershellToolbox.ps1) — launches the menu-driven toolbox.
 - Configuration: [config.yaml](config.yaml) — default values for prompts and operations.
 - Modules: [modules/Common.ps1](modules/Common.ps1), [modules/FileTools.ps1](modules/FileTools.ps1), [modules/NetworkTools.ps1](modules/NetworkTools.ps1), [modules/SystemTools.ps1](modules/SystemTools.ps1), [modules/SecurityTools.ps1](modules/SecurityTools.ps1), [modules/HypervisorTools.ps1](modules/HypervisorTools.ps1), [modules/ProxmoxTools.ps1](modules/ProxmoxTools.ps1), [modules/VMwareTools.ps1](modules/VMwareTools.ps1), [modules/CloudTools.ps1](modules/CloudTools.ps1), [modules/AzureTools.ps1](modules/AzureTools.ps1).
+ - Modules (continued): [modules/ActiveDirectoryTools.ps1](modules/ActiveDirectoryTools.ps1) — AD user/group/OU/computer management, reporting, ACL, FSMO.
 - Tests: [tests](tests) — Pester v5 test suites for modules and menu dispatch.
 - Logs: [logs](logs) — transcript and operational logs (ignored by Git).
 - Output: [output](output) — generated manifests and exports (ignored by Git).
+ - Templates: [templates](templates) — CSV examples for onboarding, offboarding, and bulk updates.
 
 ## Examples
+
+### Active Directory
+- Create user
+  - Function: `AD-User-Create`
+  - Inputs: Display Name, sAMAccountName, UPN, OU (defaults from `ADDefaults`), initial password
+  - Under the hood: `New-ADUser` (via wrapper `AD-NewUserCmd`)
+
+- Disable/Enable user
+  - Functions: `AD-User-Disable`, `AD-User-Enable`
+  - Under the hood: `Disable-ADAccount` / `Enable-ADAccount`
+
+- Bulk-create users from CSV
+  - Function: `AD-User-BulkCreateFromCsv`
+  - CSV columns: `Name,SamAccountName,UPN,OU,Password`
+  - Under the hood: `Import-Csv` + `New-ADUser`
+
+- Create group and add member
+  - Functions: `AD-Group-Create`, `AD-Group-AddMember`
+  - Defaults: `DefaultGroupOU`, `DefaultGroupScope` from `ADDefaults`
+  - Under the hood: `New-ADGroup`, `Add-ADGroupMember`
+
+- Create OU
+  - Function: `AD-OU-Create`
+  - Under the hood: `New-ADOrganizationalUnit`
+
+- Read/Modify ACL (example no-op)
+  - Functions: `AD-ACL-Read`, `AD-ACL-Modify`
+  - Under the hood: `Get-Acl`, `Set-Acl`
+
+- View FSMO roles
+  - Function: `AD-FSMO-View`
+  - Under the hood: `Get-ADDomain`
+
+Access: System Tools → Active Directory
+
+#### Expanded Tools
+- Search & Reporting
+  - Search objects in OU: `AD-Search-ObjectsInOU` (users/groups/computers)
+  - Password expiration (within N days): `AD-Report-PasswordExpiration`
+  - Last logon times: `AD-Report-LastLogonTimes`
+  - Inactive users/computers: `AD-Report-InactiveUsers`, `AD-Report-InactiveComputers`
+- Organizational Units
+  - Cleanup empty OUs (advisory): `AD-Cleanup-EmptyOUs`
+  - Delegate permissions (simplified): `AD-OU-DelegatePermission`
+- Groups
+  - Audit membership snapshot: `AD-Group-AuditMembership`
+- Service Accounts
+  - Create gMSA (simplified): `AD-gMSA-Create`
+  - Install/get gMSA: `AD-gMSA-Install`, `AD-gMSA-Get`
+- Domain & Infrastructure
+  - View trusts: `AD-Trusts-View`
+  - Sites & Subnets (stubs): `AD-Sites-Create`
+  - FSMO transfer: `AD-FSMO-Transfer`
+  - FSMO seize: `AD-FSMO-Seize`
+  - Replication monitoring (stub): `AD-Replication-Monitor`
+  - DC health check: `AD-DC-HealthCheck`
+
+- Automation & Bulk Operations
+  - Onboarding from CSV (create, groups, home folder): `AD-Onboarding-FromCsv`
+  - Offboarding from CSV (disable, move, remove groups): `AD-Offboarding-FromCsv`
+  - Bulk update attributes from CSV: `AD-User-BulkUpdateFromCsv`
+  - Set home folder: `AD-User-SetHomeFolder` (uses `ADDefaults.DefaultHomeFolderRoot`, `DefaultHomeDrive`)
+  - Generate CSV templates: `AD-GenerateCsvTemplates` (writes to `templates/`)
 
 Below are quick “recipes” showing typical workflows. Most tasks are interactive; the examples show the menu path and the command that gets executed under the hood.
 
@@ -506,3 +623,4 @@ Below are quick “recipes” showing typical workflows. Most tasks are interact
 ### Logging and Output Behavior
 - When enabled, actions run under a transcript and write logs to `logs/toolbox.log`.
 - Selected outputs are saved to `output/` for easier auditing.
+ - Destructive operations (delete trust/group/OU/computer/user) prompt for confirmation and support `-WhatIf`/`-Confirm` where applicable.

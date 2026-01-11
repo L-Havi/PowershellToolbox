@@ -215,6 +215,20 @@ function Get-AzureDefaults {
     }
 }
 
+function Get-ADDefaults {
+    $section = Get-ConfigSection -SectionName "ADDefaults"
+    return [PSCustomObject]@{
+        DomainController  = if ($section.ContainsKey("DomainController"))  { $section["DomainController"] } else { "" }
+        DefaultUserOU     = if ($section.ContainsKey("DefaultUserOU"))     { $section["DefaultUserOU"] } else { "" }
+        DefaultGroupOU    = if ($section.ContainsKey("DefaultGroupOU"))    { $section["DefaultGroupOU"] } else { "" }
+        DefaultComputerOU = if ($section.ContainsKey("DefaultComputerOU")) { $section["DefaultComputerOU"] } else { "" }
+        DefaultPassword   = if ($section.ContainsKey("DefaultPassword"))   { $section["DefaultPassword"] } else { "P@ssw0rd!" }
+        DefaultGroupScope = if ($section.ContainsKey("DefaultGroupScope")) { $section["DefaultGroupScope"] } else { "Global" }
+        DefaultHomeFolderRoot = if ($section.ContainsKey("DefaultHomeFolderRoot")) { $section["DefaultHomeFolderRoot"] } else { "" }
+        DefaultHomeDrive      = if ($section.ContainsKey("DefaultHomeDrive"))      { $section["DefaultHomeDrive"] } else { "H:" }
+    }
+}
+
 function Get-AppOutputSettings {
     $sec = Get-ConfigSection -SectionName "OutputSettings"
     return [PSCustomObject]@{

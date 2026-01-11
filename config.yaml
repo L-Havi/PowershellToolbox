@@ -92,6 +92,16 @@ AzureDefaults:
   DefaultImage: "UbuntuLTS"
   DefaultVMSize: "Standard_B2s"
 
+ADDefaults:
+  DomainController: "dc1.domain.local"
+  DefaultUserOU: "OU=Users,DC=domain,DC=local"
+  DefaultGroupOU: "OU=Groups,DC=domain,DC=local"
+  DefaultComputerOU: "OU=Computers,DC=domain,DC=local"
+  DefaultPassword: "P@ssw0rd!"
+  DefaultGroupScope: "Global"
+  DefaultHomeFolderRoot: "\\\\fileserver\\homes"
+  DefaultHomeDrive: "H:"
+
 OutputSettings:
   Enabled: true
   Folder: "output"

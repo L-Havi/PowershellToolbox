@@ -48,8 +48,8 @@ function Azure-IaCMenu {
         Show-Header -Title "Azure :: IaC"
         Write-Host " [1] Export Resource Group template" -ForegroundColor White
         Write-Host " [2] Export single resource (az CLI)" -ForegroundColor White
-        Write-Host " [3] Bicep: Decompile ARM JSON → Bicep" -ForegroundColor White
-        Write-Host " [4] Bicep: Build Bicep → ARM JSON" -ForegroundColor White
+        Write-Host " [3] Bicep: Decompile ARM JSON to Bicep" -ForegroundColor White
+        Write-Host " [4] Bicep: Build Bicep to ARM JSON" -ForegroundColor White
         Write-Host ""; Write-Host " [0] Back" -ForegroundColor DarkGray; Write-Host ""
         $sel = Read-Host "Select an action"
         switch ($sel) {

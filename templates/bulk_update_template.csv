@@ -1,0 +1,3 @@
+SamAccountName,GivenName,Surname,Department,Manager
+asmith,Alice,Smith,Marketing,CN=Bob Manager,OU=Users,DC=domain,DC=local
+bjones,Bob,Jones,Sales,CN=Sara Lead,OU=Users,DC=domain,DC=local

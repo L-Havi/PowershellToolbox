@@ -1,0 +1,3 @@
+SamAccountName,TargetOU
+asmith,OU=Disabled Users,DC=domain,DC=local
+bjones,OU=Disabled Users,DC=domain,DC=local

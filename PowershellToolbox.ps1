@@ -21,6 +21,7 @@ $Global:LabConfigFile = Join-Path $Global:WorkspaceRoot "config.yaml"
 . (Join-Path $Global:WorkspaceRoot "modules\\HypervisorTools.ps1")
 . (Join-Path $Global:WorkspaceRoot "modules\\CloudTools.ps1")
 . (Join-Path $Global:WorkspaceRoot "modules\\AzureTools.ps1")
+. (Join-Path $Global:WorkspaceRoot "modules\\ActiveDirectoryTools.ps1")
 
 # Main Menu
 function Show-MainMenu {
@@ -39,7 +40,7 @@ function Show-MainMenu {
         Write-Host " [3] System Tools" -ForegroundColor White
         Write-Host " [4] Security Tools" -ForegroundColor White
         Write-Host " [5] Hypervisor Tools" -ForegroundColor White
-        Write-Host " [6] Cloud Environments" -ForegroundColor White
+        Write-Host " [6] Cloud Environment Tools" -ForegroundColor White
         Write-Host ""
         Write-Host " [0] Exit" -ForegroundColor DarkGray
         Write-Host ""
