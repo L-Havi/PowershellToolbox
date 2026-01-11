@@ -1,0 +1,18 @@
+# PowerShell Toolbox gitignore
+.vscode/tasks.json
+.vscode
+# Generated outputs and logs
+output/
+logs/
+
+# Test artifacts
+# Pester run cache and XML/JUnit outputs
+.PesterRun/
+testResults.xml
+
+# PowerShell transcripts (if written outside logs/)
+PowerShell_transcript*
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

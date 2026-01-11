@@ -1,0 +1,116 @@
+# Global Toolbox Configuration
+
+# Sections:
+# - SystemSettings: misc app preferences (not used by code yet; for future use)
+# - NetworkDefaults: defaults for interactive network tasks
+# - ProxmoxDefaults: defaults for Proxmox SSH utilities
+# - VmwareDefaults: defaults for VMware SSH utilities
+
+SystemSettings:
+  # Example settings (currently not consumed by scripts)
+  DefaultStartMenu: "Main"
+  Theme: "Light"
+
+ProcessDefaults:
+  Executable: "notepad.exe"
+  Arguments: ""
+  NameToStop: "notepad"
+
+RegistryDefaults:
+  Hive: "HKLM"
+  Path: "SOFTWARE\\MyApp"
+  ValueName: "Setting"
+
+NetworkDefaults:
+  # Adapter and addressing
+  InterfaceAlias: "Ethernet"
+  IPv4Address: "192.168.1.100"
+  # Either PrefixLength or SubnetMask can be used. PrefixLength takes precedence if both provided.
+  PrefixLength: "24"
+  SubnetMask: "255.255.255.0"
+  DefaultGateway: "192.168.1.1"
+  # Comma-separated list
+  DnsServers: "1.1.1.1,8.8.8.8"
+  DnsSuffix: "example.local"
+  # SMB share and mapping defaults
+  ShareName: "public"
+  SharePath: "C:\\Shares\\Public"
+  DriveLetter: "Z"
+  UNCPath: "\\\\server\\public"
+
+RemoteDefaults:
+  SSHHost: "server.example.local"
+  SSHUser: "administrator"
+  SSHPort: "22"
+  TelnetHost: "legacy.example.local"
+  TelnetPort: "23"
+  RDPHost: "winhost.example.local"
+  RDPPort: "3389"
+
+ListenerDefaults:
+  BindAddress: "0.0.0.0"
+  Port: "9000"
+  AutoStopSeconds: "0"
+
+  # Route defaults for quick add/remove operations
+  # These are kept under NetworkDefaults for convenience as well:
+  # RouteDestinationPrefix: "10.10.0.0/16"
+  # RouteNextHop: "192.168.1.1"
+  # RouteInterfaceAlias: "Ethernet"
+  # RouteMetric: "10"
+
+ProxmoxDefaults:
+  Host: "192.168.68.51"
+  User: "root"
+  # valid: ssh, plink
+  SshMethod: "ssh"
+  # full path or just plink.exe in PATH
+  PlinkPath: "plink.exe"
+
+VmwareDefaults:
+  Host: "10.10.20.1"
+  User: "root"
+  SshMethod: "ssh"
+  PlinkPath: "plink.exe"
+  # Optional vCenter + govc settings for advanced operations
+  VCenterHost: "vc.example.local"
+  VCenterUser: "administrator@vsphere.local"
+  GovcPath: "govc"
+  # Datastore defaults
+  DefaultDatastore: "datastore1"
+  IsoFolder: "iso"
+
+AzureDefaults:
+  SubscriptionId: "00000000-0000-0000-0000-000000000000"
+  TenantId: "00000000-0000-0000-0000-000000000000"
+  ResourceGroup: "rg-lab"
+  Location: "eastus"
+  RoleDefinitionName: "Contributor"
+  DefaultVNetName: "vnet1"
+  DefaultSubnetName: "subnet1"
+  DefaultNSGName: "nsg1"
+  DefaultImage: "UbuntuLTS"
+  DefaultVMSize: "Standard_B2s"
+
+OutputSettings:
+  Enabled: true
+  Folder: "output"
+  WriteHashManifest: true
+
+LoggingSettings:
+  Enabled: true
+  Folder: "logs"
+  FileName: "toolbox.log"
+
+TransferDefaults:
+  # SFTP via PuTTY psftp.exe
+  SFTPHost: "sftp.example.local"
+  SFTPUser: "user"
+  SFTPPort: "22"
+  PSFTPPath: "psftp.exe"  # if not in PATH, provide full path
+  SFTPRemotePath: "/upload"
+  # FTP via built-in ftp.exe
+  FTPHost: "ftp.example.local"
+  FTPPort: "21"
+  FTPRemotePath: "/upload"
+  VerificationAlgorithm: "SHA256"
