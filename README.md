@@ -1,6 +1,6 @@
 # PowerShell Toolbox
 
-A modular, menu-driven toolbox for common Windows admin tasks: file management, networking, system/services, security, and hypervisors (Proxmox/VMware). Includes Pester tests and YAML-based defaults. Output and logging are configurable and enabled by default.
+A modular, menu-driven toolbox for common Windows admin tasks: file management, networking, system/services, security, hypervisors (Proxmox/VMware), and Cloud Environments (Azure). Includes Pester tests and YAML-based defaults. Output and logging are configurable and enabled by default.
 
 ## Quick Start
 
@@ -211,7 +211,7 @@ Invoke-Pester -Path .\tests -CI
 
 - Root script: [PowershellToolbox.ps1](PowershellToolbox.ps1) — launches the menu-driven toolbox.
 - Configuration: [config.yaml](config.yaml) — default values for prompts and operations.
-- Modules: [modules/Common.ps1](modules/Common.ps1), [modules/FileTools.ps1](modules/FileTools.ps1), [modules/NetworkTools.ps1](modules/NetworkTools.ps1), [modules/SystemTools.ps1](modules/SystemTools.ps1), [modules/SecurityTools.ps1](modules/SecurityTools.ps1), [modules/HypervisorTools.ps1](modules/HypervisorTools.ps1), [modules/ProxmoxTools.ps1](modules/ProxmoxTools.ps1), [modules/VMwareTools.ps1](modules/VMwareTools.ps1).
+- Modules: [modules/Common.ps1](modules/Common.ps1), [modules/FileTools.ps1](modules/FileTools.ps1), [modules/NetworkTools.ps1](modules/NetworkTools.ps1), [modules/SystemTools.ps1](modules/SystemTools.ps1), [modules/SecurityTools.ps1](modules/SecurityTools.ps1), [modules/HypervisorTools.ps1](modules/HypervisorTools.ps1), [modules/ProxmoxTools.ps1](modules/ProxmoxTools.ps1), [modules/VMwareTools.ps1](modules/VMwareTools.ps1), [modules/CloudTools.ps1](modules/CloudTools.ps1), [modules/AzureTools.ps1](modules/AzureTools.ps1).
 - Tests: [tests](tests) — Pester v5 test suites for modules and menu dispatch.
 - Logs: [logs](logs) — transcript and operational logs (ignored by Git).
 - Output: [output](output) — generated manifests and exports (ignored by Git).
